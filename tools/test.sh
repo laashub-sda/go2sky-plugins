@@ -1,3 +1,4 @@
+#!/bin/bash -e
 # Licensed to SkyAPM org under one or more contributor
 # license agreements. See the NOTICE file distributed with
 # this work for additional information regarding copyright
@@ -15,30 +16,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Build
-
-on:
-  pull_request:
-  push:
-    branches:
-      - master
-
-jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Go 1.12
-        uses: actions/setup-go@v1
-        with:
-          go-version: 1.12
-        id: go
-
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-
-      - name: Get dependencies
-        run: make deps
-
-      - name: Test
-        run: make test
+mod="github.com/SkyAPM/go2sky-plugins"
+PKGS=""
+for d in $(find * -name 'go.mod'); do
+  pushd $(dirname $d) >/dev/null
+  echo "🟢 testing `sed -n 1p go.mod|cut -d ' ' -f2`"
+  go mod download
+  go test -v ./...
+  popd >/dev/null
+done
